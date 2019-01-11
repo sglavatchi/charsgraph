@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -38,12 +39,12 @@ namespace GraphParsing
                 }
             }
 
-            RemoveHostChar();
-            RemoveDuplciates();
+            RemoveHostCharFromDependencies();
+            RemoveDuplicates();
 
             return this;
         }
-        private void RemoveDuplciates()
+        private void RemoveDuplicates()
         {
             for (int index = 0; index < matrixDictionary.Count; index++)
             {
@@ -51,7 +52,7 @@ namespace GraphParsing
                 matrixDictionary[item.Key] = item.Value.Distinct().ToList();
             }
         }
-        private void RemoveHostChar()
+        private void RemoveHostCharFromDependencies()
         {
             foreach (var pair in matrixDictionary)
             {
@@ -86,38 +87,80 @@ namespace GraphParsing
 
         public List<string> ComputeWords()
         {
-            List<Word> words = new List<Word>();
+            Dictionary<char, List<string>> words = new Dictionary<char, List<string>>();
 
-            ComputeTwoCharsWords(words);
-
-            //for (var index = 0; index < words.Count; index++)
-            //{
-            //    var word = words[index];
-            //    if ()
-            //}
-
-            return words.Select(w => w.ToString()).ToList();
-        }
-
-        private void ComputeTwoCharsWords(List<Word> words)
-        {
-            foreach (var item in matrixDictionary)
+            foreach (var node in GetAllNodes())
             {
-                GetValue(words, item.Key, item.Value);
+                var sortedNodes = new List<char>();
+                var visitedNodes = new HashSet<char>();
+
+                Visit(words, node, visitedNodes, sortedNodes, GetNodeDependencies());
             }
+
+            var result = GetResult(words);
+
+            return result;
         }
-
-        private static void GetValue(List<Word> words, char key, List<char> neighbors)
+        private List<char> GetAllNodes()
         {
-            foreach (char neighbor in neighbors)
-            {
-                var word = new Word($"{key}{neighbor}");
+            List<char> nodes = new List<char>(matrixDictionary.Keys.ToList());
 
-                if (!words.Contains(word))
+            foreach (List<char> matrixDictionaryValue in matrixDictionary.Values)
+            {
+                nodes.AddRange(matrixDictionaryValue);
+            }
+            return nodes.Distinct().ToList();
+        }
+        private Func<char, IEnumerable<char>> GetNodeDependencies()
+        {
+            return hostChar =>
+            {
+                if (matrixDictionary.ContainsKey(hostChar))
                 {
-                    words.Add(word);
+                    return matrixDictionary[hostChar];
                 }
+                return new char[0];
+            };
+        }
+        private static void Visit(Dictionary<char, List<string>> words, char item, HashSet<char> visitedNodes, List<char> sortedNodes, Func<char, IEnumerable<char>> nodeDependencies)
+        {
+            if (!visitedNodes.Contains(item))
+            {
+                visitedNodes.Add(item);
+
+                foreach (var dep in nodeDependencies(item))
+                {
+                    Visit(words, dep, visitedNodes, sortedNodes, nodeDependencies);
+                }
+
+                var word = ComputeWord(visitedNodes, sortedNodes);
+
+                if (words.ContainsKey(item))
+                    words[item].Add(word);
+                else
+                    words.Add(item, new List<string> { word });
+
+                sortedNodes.Add(item);
             }
         }
+        private static string ComputeWord(HashSet<char> visitedNodes, List<char> sortedNodes)
+        {
+            HashSet<char> hashSet = new HashSet<char>(visitedNodes);
+            hashSet.RemoveWhere(sortedNodes.Contains);
+            IEnumerable<char> reverse = hashSet.Reverse();
+
+            return $"{string.Join("", reverse)}";
+        }
+        private static List<string> GetResult(Dictionary<char, List<string>> words)
+        {
+            List<string> result = new List<string>();
+            foreach (KeyValuePair<char, List<string>> word in words)
+            {
+                result.AddRange(word.Value);
+            }
+            return result;
+        }
+
     }
 }
+
