@@ -7,11 +7,13 @@ namespace GraphParsing
 {
     public class CharsGraph
     {
+        private readonly List<string> vocabularyList;
         readonly Dictionary<char, List<char>> matrixDictionary;
 
-        public CharsGraph()
+        public CharsGraph(List<string> vocabularyList = null)
         {
-            matrixDictionary = new Dictionary<char, List<char>>();
+            this.vocabularyList = vocabularyList ?? new List<string>();
+            this.matrixDictionary = new Dictionary<char, List<char>>();
         }
 
         public CharsGraph AddEdge(char hostChar, string neighbors)
@@ -122,7 +124,7 @@ namespace GraphParsing
                 return new char[0];
             };
         }
-        private static void Visit(Dictionary<char, List<string>> words, char item, HashSet<char> visitedNodes, List<char> sortedNodes, Func<char, IEnumerable<char>> nodeDependencies)
+        private void Visit(Dictionary<char, List<string>> words, char item, HashSet<char> visitedNodes, List<char> sortedNodes, Func<char, IEnumerable<char>> nodeDependencies)
         {
             if (!visitedNodes.Contains(item))
             {
@@ -135,10 +137,10 @@ namespace GraphParsing
 
                 var word = ComputeWord(visitedNodes, sortedNodes);
 
-                if (words.ContainsKey(item))
-                    words[item].Add(word);
-                else
-                    words.Add(item, new List<string> { word });
+                if (IsLegitimeWord(word))
+                {
+                    AddLegitimeWord(words, item, word);
+                }
 
                 sortedNodes.Add(item);
             }
@@ -150,6 +152,18 @@ namespace GraphParsing
             IEnumerable<char> reverse = hashSet.Reverse();
 
             return $"{string.Join("", reverse)}";
+        }
+        private bool IsLegitimeWord(string word)
+        {
+            //return vocabularyList.Contains(word);
+            return true;
+        }
+        private static void AddLegitimeWord(Dictionary<char, List<string>> words, char item, string word)
+        {
+            if (words.ContainsKey(item))
+                words[item].Add(word);
+            else
+                words.Add(item, new List<string> { word });
         }
         private static List<string> GetResult(Dictionary<char, List<string>> words)
         {

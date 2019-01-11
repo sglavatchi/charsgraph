@@ -56,7 +56,7 @@ namespace GraphParsingTests
         public void ComputeWords_2Chars_Computed()
         {
             // arrange
-            CharsGraph charsGraph = new CharsGraph();
+            CharsGraph charsGraph = new CharsGraph(new List<string> { "ae", "ea", "ab", "ba" });
 
             // act
             charsGraph.AddEdge('a', "eb");
@@ -74,7 +74,7 @@ namespace GraphParsingTests
         public void ComputeWords_3Chars_Computed()
         {
             // arrange
-            CharsGraph charsGraph = new CharsGraph();
+            CharsGraph charsGraph = new CharsGraph(new List<string> { "ae", "ea", "ab", "ba", "bc", "cb", "abc", "cba", "bae", "eab", "eabc", "cbae" });
 
             // act
             charsGraph.AddEdge('a', "eb").AddEdge('b', "c");
@@ -99,6 +99,39 @@ namespace GraphParsingTests
 
             CollectionAssert.Contains(words, "eabc");
             CollectionAssert.Contains(words, "cbae");
+        }
+
+        [Test]
+        public void ComputeWords_MultiChars_Computed()
+        {
+            // arrange
+            CharsGraph charsGraph = new CharsGraph();
+
+            // act
+            charsGraph.AddEdge('a', "eb").AddEdge('b', "cde").AddEdge('c', "d").AddEdge('d', "e").AddEdge('e', "a");
+
+            // asserst
+            List<string> words = charsGraph.ComputeWords();
+
+            Assert.AreEqual(25, words.Count);
+        }
+
+        [Test]
+        public void ComputeWords_3Chars_ComputedFiltered()
+        {
+            // arrange
+            CharsGraph charsGraph = new CharsGraph(new List<string> { "cba", "ea" });
+
+            // act
+            charsGraph.AddEdge('a', "eb").AddEdge('b', "c");
+
+            // asserst
+            List<string> words = charsGraph.ComputeWords();
+
+            Assert.AreEqual(2, words.Count);
+
+            CollectionAssert.Contains(words, "cba");
+            CollectionAssert.Contains(words, "ea");
         }
     }
 }
