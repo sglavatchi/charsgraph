@@ -33,7 +33,7 @@ namespace GraphParsing
             {
                 if (matrixDictionary.ContainsKey(newHostChar))
                 {
-                    matrixDictionary[newHostChar].AddRange(neighborChars);
+                    matrixDictionary[newHostChar].Add(hostChar);
                 }
                 else
                 {
@@ -155,7 +155,7 @@ namespace GraphParsing
         }
         private bool IsLegitimeWord(string word)
         {
-            return vocabularyList.Contains(word);
+           return vocabularyList.Contains(word);
         }
         private static void AddLegitimeWord(Dictionary<char, List<string>> words, char item, string word)
         {

@@ -44,12 +44,12 @@ namespace GraphParsingTests
             CharsGraph charsGraph = new CharsGraph();
 
             // act
-            charsGraph.AddEdge('a', "eb").AddEdge('b', "cde").AddEdge('c', "d").AddEdge('d', "e").AddEdge('e', "a");
+            charsGraph.AddEdge('a', "eb").AddEdge('b', "cde").AddEdge('c', "d").AddEdge('d', "e");
 
             // asserst
             string s = charsGraph.ToString();
 
-            Assert.AreEqual("a:e,b;e:a,c,d;b:a,c,d,e;c:b,d;d:b,e;", s);
+            Assert.AreEqual("a:e,b;e:a,b,d;b:a,c,d,e;c:b,d;d:b,c,e;", s);
         }
 
         [Test]
